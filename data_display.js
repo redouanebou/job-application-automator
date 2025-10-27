@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const controlsContainer = document.getElementById('controls-container');
 
   const showMessage = (message, type = 'default') => {
-      dataDisplayArea.innerHTML = ''; // Clear previous content
+      dataDisplayArea.innerHTML = ''; 
       const messageP = document.createElement('p');
       messageP.className = 'message-area';
       if (type === 'error') {
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   showMessage("Loading data, please wait...");
-  if(controlsContainer) controlsContainer.innerHTML = ''; // Clear controls while loading
+  if(controlsContainer) controlsContainer.innerHTML = ''; 
 
   chrome.storage.local.get(['scrapedData'], (result) => {
     if (chrome.runtime.lastError) {
@@ -35,8 +35,8 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log("[data_display.js] Retrieved data:", scrapedData);
 
     if (scrapedData && scrapedData.length > 0) {
-      dataDisplayArea.innerHTML = ''; // Clear loading message
-      if(controlsContainer) controlsContainer.innerHTML = ''; // Clear and prepare for new buttons
+      dataDisplayArea.innerHTML = ''; 
+      if(controlsContainer) controlsContainer.innerHTML = ''; 
 
       const tableWrapper = document.createElement('div');
       tableWrapper.className = 'table-responsive-wrapper';
@@ -46,7 +46,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const thead = table.createTHead();
       const headerRow = thead.insertRow();
-      // Updated headers for display: Company Name, Person Name, Email (Error column removed)
       const displayHeaders = ["Company Name", "Person Name", "Email"];
       displayHeaders.forEach(text => {
         const th = document.createElement('th');
@@ -69,23 +68,18 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             emailCell.textContent = entry.email || 'N/A';
         }
-        // Error column display logic removed from here
-        // if (entry.error) {
-        //     row.title = `Error: ${entry.error}`; // Tooltip for error
-        // }
       });
 
       tableWrapper.appendChild(table);
       dataDisplayArea.appendChild(tableWrapper);
 
-      // Add Download CSV button
       const downloadCsvButton = createButton('Download Data (CSV)', 'btn-green', () => {
-          const csvData = convertToCSV(scrapedData); // convertToCSV will use the updated headers
+          const csvData = convertToCSV(scrapedData); 
           const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
-          a.download = 'gastrojobs_scraped_data.csv'; // Filename for Gastrojobs
+          a.download = 'gastrojobs_scraped_data.csv'; 
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
@@ -95,14 +89,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     } else {
       showMessage('No data collected yet. Start scraping to see results.');
-      if(controlsContainer) controlsContainer.innerHTML = ''; // No data, no download buttons
+      if(controlsContainer) controlsContainer.innerHTML = ''; 
     }
   });
 });
 
-// Function to convert data to CSV (Updated to remove Error column)
 function convertToCSV(data) {
-  // Updated CSV headers: Company Name, Person Name, Email (Error column removed)
   const csvHeaders = ["Company Name", "Person Name", "Email"];
   const csvRows = [];
   csvRows.push(csvHeaders.join(','));
@@ -112,10 +104,8 @@ function convertToCSV(data) {
       item.companyName || 'N/A',
       item.personName || 'N/A',
       item.email || 'N/A'
-      // item.error || '' // Error data removed from CSV export
     ].map(value => {
       const stringValue = String(value);
-      // Escape double quotes by doubling them, and enclose in double quotes
       const escapedValue = stringValue.replace(/"/g, '""');
       return `"${escapedValue}"`;
     });
@@ -123,3 +113,4 @@ function convertToCSV(data) {
   }
   return csvRows.join('\n');
 }
+

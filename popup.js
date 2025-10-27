@@ -2,13 +2,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const startScrapingButton = document.getElementById('startScraping');
     const stopScrapingButton = document.getElementById('stopScraping');
     const showDataButton = document.getElementById('showData');
-    const deleteDataButton = document.getElementById('deleteData'); // New button
+    const deleteDataButton = document.getElementById('deleteData'); 
     const statusDiv = document.getElementById('status');
 
     const setStatus = (message, type = 'default') => {
         if (statusDiv) {
             statusDiv.textContent = message;
-            statusDiv.className = 'status-area'; // Reset classes
+            statusDiv.className = 'status-area'; 
             switch (type) {
                 case 'info': statusDiv.classList.add('status-info'); break;
                 case 'success': statusDiv.classList.add('status-success'); break;
@@ -22,7 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const updateButtonStates = (isScraping) => {
         if (startScrapingButton) startScrapingButton.disabled = isScraping;
         if (stopScrapingButton) stopScrapingButton.disabled = !isScraping;
-        // Delete button should generally be enabled unless scraping is active
         if (deleteDataButton) deleteDataButton.disabled = isScraping;
     };
 
@@ -36,8 +35,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (stopScrapingButton) {
         stopScrapingButton.addEventListener('click', () => {
-            stopScrapingButton.disabled = true; // Visually disable immediately
-            if(deleteDataButton) deleteDataButton.disabled = true; // Also disable delete during stopping
+            stopScrapingButton.disabled = true; 
+            if(deleteDataButton) deleteDataButton.disabled = true;
             setStatus("Sending stop request...", 'info');
             chrome.runtime.sendMessage({ action: "stopScraping" });
         });
@@ -50,12 +49,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Event listener for the new Delete Data button
     if (deleteDataButton) {
         deleteDataButton.addEventListener('click', () => {
-            // Optional: Add a confirmation dialog here if desired,
-            // but standard browser confirm() might not work well in popups.
-            // For simplicity, directly sending the message.
             setStatus("Requesting data deletion...", 'warning');
             chrome.runtime.sendMessage({ action: "deleteData" }, (response) => {
                 if (chrome.runtime.lastError) {
@@ -64,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else if (response && response.status) {
                     setStatus(response.status, response.statusType || 'success');
                 } else {
-                    setStatus("Data deletion request sent.", 'info'); // Fallback
+                    setStatus("Data deletion request sent.", 'info'); 
                 }
             });
         });
@@ -72,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     chrome.runtime.onMessage.addListener((message) => {
         if (message.action === "updateStatus" && typeof message.status !== 'undefined') {
-            const statusType = message.statusType || 'default'; // Ensure statusType has a default
+            const statusType = message.statusType || 'default'; 
             console.log(`[popup.js] Status Update: Msg='${message.status}', Type='${statusType}'`);
             setStatus(message.status, statusType);
 
@@ -104,3 +99,4 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 });
+

@@ -1,5 +1,3 @@
-// content.js for gastrojobs.de
-
 if (typeof window.gastrojobsScraper === 'undefined') {
   window.gastrojobsScraper = {
     baseUrl: "https://www.gastrojobs.de",
@@ -144,3 +142,4 @@ if (typeof window.gastrojobsScraper === 'undefined') {
   console.log("[content.js] Gastrojobs content script already loaded.");
 }
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => { return true; });
+

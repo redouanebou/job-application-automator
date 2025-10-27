@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gastrojobs Scraper</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: #f7fafc;
+            color: #2d3748;
+            font-size: 14px;
+        }
+        .popup-container {
+            width: 300px;
+            padding: 16px;
+            box-sizing: border-box;
+        }
+        .title {
+            font-size: 1.125rem; /* 18px */
+            font-weight: 600;
+            color: #1a202c;
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 15px;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            text-align: center;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .btn svg {
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+        }
+        .btn-primary { background-color: #3182ce; color: white; }
+        .btn-primary:hover { background-color: #2b6cb0; }
+        .btn-danger { background-color: #e53e3e; color: white; }
+        .btn-danger:hover { background-color: #c53030; }
+        .btn-warning { background-color: #dd6b20; color: white; } /* For Delete Data */
+        .btn-warning:hover { background-color: #c05621; }
+        .btn-secondary { background-color: #e2e8f0; color: #2d3748; }
+        .btn-secondary:hover { background-color: #cbd5e0; }
+        .btn:disabled {
+            background-color: #cbd5e0;
+            color: #a0aec0;
+            cursor: not-allowed;
+        }
+        .status-area {
+            margin-top: 20px;
+            padding: 12px;
+            font-size: 14px;
+            text-align: center;
+            border-radius: 6px;
+            line-height: 1.4;
+            word-wrap: break-word;
+            min-height: 1.4em;
+        }
+        .status-default { background-color: #edf2f7; color: #4a5568; }
+        .status-info { background-color: #ebf8ff; color: #3182ce; }
+        .status-success { background-color: #f0fff4; color: #38a169; }
+        .status-warning { background-color: #fffaf0; color: #dd6b20; } /* For status messages */
+        .status-error { background-color: #fff5f5; color: #c53030; }
+    </style>
+</head>
+<body>
+    <div class="popup-container">
+        <h2 class="title">Gastrojobs Scraper</h2>
+
+        <div class="button-group">
+            <button id="startScraping" class="btn btn-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" /></svg>
+                Start Scraping
+            </button>
+            <button id="stopScraping" class="btn btn-danger" disabled>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 9a1 1 0 000 2h4a1 1 0 100-2H8z" clip-rule="evenodd" /></svg>
+                Stop Scraping
+            </button>
+            <button id="showData" class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>
+                Show Data
+            </button>
+            <button id="deleteData" class="btn btn-warning"> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                </svg>
+                Delete Data
+            </button>
+        </div>
+
+        <div id="status" class="status-area status-default">
+            Ready to start...
+        </div>
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html>

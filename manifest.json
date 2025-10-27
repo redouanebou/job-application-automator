@@ -1,0 +1,39 @@
+{
+  "manifest_version": 3,
+  "name": "Gastrojobs Scraper",
+  "version": "1.1",
+  "description": "Scrapes company name, contact person, and email from gastrojobs.de listings.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "tabs",
+    "webNavigation"
+  ],
+  "host_permissions": [
+    "https://www.gastrojobs.de/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "images/icon16.png",
+      "48": "images/icon48.png",
+      "128": "images/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "images/icon16.png",
+    "48": "images/icon48.png",
+    "128": "images/icon128.png"
+  },
+   "web_accessible_resources": [
+    {
+      "resources": ["data_display.html", "data_display.css", "data_display.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

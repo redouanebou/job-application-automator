@@ -1,0 +1,67 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+  background-color: #f8f9fa;
+  color: #333;
+}
+
+h1 {
+  color: #0056b3;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+#data-container {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow-x: auto; /* Add horizontal scroll for tables on small screens */
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.data-table th, .data-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+
+.data-table th {
+  background-color: #e9ecef;
+  font-weight: bold;
+}
+
+.data-table tbody tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+.data-table td a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.data-table td a:hover {
+  text-decoration: underline;
+}
+
+/* No specific data-entry class needed for table rows */
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  body {
+    margin: 10px;
+  }
+
+  #data-container {
+    padding: 15px;
+  }
+
+  .data-table th, .data-table td {
+    padding: 8px;
+  }
+}

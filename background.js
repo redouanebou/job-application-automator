@@ -2,8 +2,8 @@ const scrapingManager = {
   state: {
     active: false, originalTabId: null, data: [],
     jobUrls: [], processedJobUrls: new Set(), currentPageUrl: null, currentPageIndex: 1,
-    jobsProcessedOnCurrentPage: 0, // Index for jobUrls on the current page
-    isPaginating: false, // Will effectively be unused or always false after a page
+    jobsProcessedOnCurrentPage: 0, 
+    isPaginating: false, 
     currentStatus: "Ready.", statusType: "default",
     activeWorkerCount: 0, maxConcurrentWorkers: 2,
     openJobTabIds: new Set()
@@ -38,7 +38,7 @@ const scrapingManager = {
   },
 
   processListPage: async function(tabId) {
-      if (!this.state.active) { // Removed isPaginating check as we won't paginate
+      if (!this.state.active) { 
           console.log("[bg] Skip processListPage: inactive."); return;
       }
       this.sendStatus(`P${this.state.currentPageIndex}: Extracting links...`, "info");
@@ -71,20 +71,20 @@ const scrapingManager = {
              this.manageJobProcessingLoop();
          } else {
              console.log(`[bg] No new URLs on P${this.state.currentPageIndex}. Scraping of this page complete.`);
-             this.completeScraping(); // MODIFICATION: No more jobs on this page, complete.
+             this.completeScraping(); 
          }
       } catch (e) {
           if (!this.state.active) { console.log("[bg] Error in processListPage, but scraping already stopped."); return; }
           console.error(`[bg] processListPage (P${this.state.currentPageIndex}) error:`, e);
           this.sendStatus(`Error P${this.state.currentPageIndex}: ${e.message}`, "error");
-          this.completeScraping(); // MODIFICATION: Error on page, complete.
+          this.completeScraping(); 
       }
   },
 
   manageJobProcessingLoop: async function() {
-    if (!this.state.active) { // Removed isPaginating check
+    if (!this.state.active) { 
         console.log("[bg] manageJobLoop: Not active, exiting.");
-        if (this.state.activeWorkerCount === 0) { // Ensure completion if stopped and workers done
+        if (this.state.activeWorkerCount === 0) { 
              this.completeScraping(false);
         }
         return;
@@ -110,13 +110,13 @@ const scrapingManager = {
 
     if (this.state.jobsProcessedOnCurrentPage >= this.state.jobUrls.length &&
         this.state.activeWorkerCount === 0 && 
-        this.state.active) { // Removed isPaginating check
+        this.state.active) { 
         console.log(`[bg] All jobs for P${this.state.currentPageIndex} dispatched and workers idle. Completing.`);
-        this.completeScraping(); // MODIFICATION: All jobs on page done, complete.
+        this.completeScraping(); 
     }
   },
 
-  processSingleJob: async function(jobUrl) { /* ... (same as v5.1, it's self-contained for one job) ... */
+  processSingleJob: async function(jobUrl) { 
     if (!this.state.active) {
       console.log(`[bg] Worker for ${jobUrl.substring(0,70)}... aborting: scraping inactive (start).`);
       throw new Error("Scraping stopped");
@@ -187,14 +187,12 @@ const scrapingManager = {
   },
 
   attemptPagination: async function(tabId) {
-    // This function will now effectively do nothing or just complete scraping
-    // as per the user's request to not go to the next page.
     console.log("[bg] attemptPagination called, but pagination is disabled. Completing scraping.");
-    this.state.isPaginating = false; // Ensure this is set
+    this.state.isPaginating = false; 
     this.completeScraping();
   },
 
-  stopScrapingProcess: async function() { /* ... (same as v5.1) ... */
+  stopScrapingProcess: async function() { 
     if (!this.state.active && this.state.activeWorkerCount === 0) {
       this.sendStatus("No active scraping to stop.", "info"); return;
     }
@@ -216,7 +214,7 @@ const scrapingManager = {
     }, 1500);
   },
 
-  completeScraping: function(openDisplay = true) { /* ... (same as v5.1) ... */
+  completeScraping: function(openDisplay = true) { 
     const wasActiveOrWorkers = this.state.active || this.state.activeWorkerCount > 0;
     this.state.active = false; this.state.isPaginating = false;
     this.state.activeWorkerCount = 0; this.state.openJobTabIds.clear();
@@ -226,7 +224,6 @@ const scrapingManager = {
       if (!this.state.currentStatus.startsWith("Finished") && !this.state.currentStatus.includes("stopped by user")) { this.sendStatus("Scraping process ended.", "info"); }
     } else {
       const count = this.state.data.length;
-      // currentPageIndex will remain 1 if pagination is disabled
       const msg = `Finished. Collected ${count} entries (email) from page ${this.state.currentPageIndex}.`;
       console.log(`[bg] ${msg}`);
       if (!this.state.currentStatus.includes("stopped by user")) { this.sendStatus(msg, "success"); }
@@ -241,7 +238,7 @@ const scrapingManager = {
     });
   },
 
-  openDataDisplayPage: function() { /* ... (same as v5.1) ... */
+  openDataDisplayPage: function() { 
     const url = chrome.runtime.getURL('data_display.html');
     chrome.tabs.query({url}, (tabs) => {
       if (tabs.length > 0) { chrome.tabs.update(tabs[0].id, {active:true}); console.log(`[bg] Focused display tab ${tabs[0].id}`);}
@@ -249,13 +246,13 @@ const scrapingManager = {
     });
   },
 
-  sendStatus: function(status, type = 'default') { /* ... (same as v4.5 - fixed) ... */
+  sendStatus: function(status, type = 'default') { 
     this.state.currentStatus = status; this.state.statusType = type;
     chrome.runtime.sendMessage({action:"updateStatus", status: status, statusType: type }).catch(e=>{/*popup not open*/});
   }
 };
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => { /* ... (same as v5.1, including deleteData) ... */
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => { 
   console.log("[bg] Received message:", message?.action);
   try {
     switch (message?.action) {
@@ -284,7 +281,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => { /* ...
   return false;
 });
 
-chrome.tabs.onRemoved.addListener((tabId) => { /* ... (same as v5.1) ... */
+chrome.tabs.onRemoved.addListener((tabId) => { 
   if (scrapingManager.state.openJobTabIds.has(tabId)) {
       console.log(`[bg] Tracked worker tab ${tabId} was removed.`);
       scrapingManager.state.openJobTabIds.delete(tabId);
@@ -296,20 +293,21 @@ chrome.tabs.onRemoved.addListener((tabId) => { /* ... (same as v5.1) ... */
   }
 });
 
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => { /* ... (same as v5.1) ... */
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => { 
   if (!scrapingManager.state.active || !scrapingManager.state.originalTabId || tabId !== scrapingManager.state.originalTabId) return;
   if (changeInfo.status === 'loading' || changeInfo.url) {
     const newUrl = changeInfo.url || tab.url;
-    if (newUrl && newUrl !== scrapingManager.state.currentPageUrl && !scrapingManager.state.isPaginating) { // isPaginating will be false here
+    if (newUrl && newUrl !== scrapingManager.state.currentPageUrl && !scrapingManager.state.isPaginating) { 
         if (!newUrl.startsWith("https://www.gastrojobs.de/jobs")) {
             console.warn(`[bg] Original tab ${tabId} navigated completely away from gastrojobs search to ${newUrl}. Stopping scraping.`);
             scrapingManager.stopScrapingProcess();
         } else if (newUrl.split('?')[0] !== scrapingManager.state.currentPageUrl.split('?')[0] && !newUrl.includes("page=")) {
-            // If base path changed and it's not clearly a pagination URL from the site itself
+           
             console.warn(`[bg] Original tab ${tabId} URL base path changed unexpectedly to ${newUrl} (was ${scrapingManager.state.currentPageUrl}). Stopping.`);
             scrapingManager.stopScrapingProcess();
         }
     }
   }
 });
-console.log("[background.js] Gastrojobs background script loaded (v5.2 - pagination disabled).");
+console.log("[background.js] Gastrojobs background script loaded (v5.2).");
+

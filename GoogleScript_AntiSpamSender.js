@@ -2,7 +2,7 @@ function initEmailSender() {
   const PROP = PropertiesService.getScriptProperties();
   const drafts = GmailApp.getDrafts().slice(0, 500);
   if (drafts.length === 0) {
-    Logger.log('❌ No drafts.');
+    Logger.log('❌ No drafts.'); 
     return;
   }
   const queue = drafts.map(d => d.getId());

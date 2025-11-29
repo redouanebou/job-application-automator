@@ -1,33 +1,48 @@
-# 🤖 "Ausbildung" Job Application Automator
+<div align="center">
 
-I built this end-to-end system to help my friends who were struggling to find an 'Ausbildung' (apprenticeship) in Germany. The manual process was slow and resulted in no replies.
+# 🤖 Ausbildung Application Automator
+### End-to-End Recruitment Outreach System
 
-**This system automated the entire process and landed 3 of them contracts in under 2 weeks.**
+![JavaScript](https://img.shields.io/badge/JavaScript-ES6%2B-yellow?style=for-the-badge&logo=javascript&logoColor=white)
+![Chrome Extension](https://img.shields.io/badge/Chrome_Ext-Manifest_V3-4285F4?style=for-the-badge&logo=google-chrome&logoColor=white)
+![Google Apps Script](https://img.shields.io/badge/Google_Apps_Script-Automation-34A853?style=for-the-badge&logo=google&logoColor=white)
 
-It works in two parts:
+<p align="center">
+  <em>A full-stack automation suite designed to streamline the apprenticeship application process in Germany, converting a 40-hour/week manual grind into a 10-minute workflow.</em>
+</p>
+
+</div>
 
 ---
 
-## Part 1: The Scraper (Chrome Extension)
+## 📉 The Problem: The "Application Grind"
 
-A Chrome Extension built with JavaScript (Manifest V3) that scrapes job listing sites.
+Finding an 'Ausbildung' (apprenticeship) in Germany is a numbers game. Candidates often face:
+* **Inefficiency:** Manually copying emails from hundreds of listings takes hours.
+* **Low Response Rate:** Generic "Copy-Paste" applications are ignored.
+* **Volume Limits:** Platforms make it physically impossible to apply to 50+ companies/day manually.
 
-* It navigates pages, opens job details in new tabs (`background.js`), and extracts key data: **Company Name**, **Contact Person**, and **Email** (`content.js`).
-* It saves this data to a clean CSV file (handled by the extension's data page).
-* The code included is for `gastrojobs.de`. I built similar modules for other sites like `aubi-plus` and `ausbildungsheld`.
+> **Impact:** My peers were spending weeks sending applications with zero replies. The process needed **Scale** and **Personalization**.
 
-## Part 2: The Mailer (Google Apps Script)
+---
 
-This is the "smart" part of the system.Firstely, Upload The CSV file from the scraper upload it to your Gmail Google Sheet.
+## 🛠️ The Solution: Automated Outreach Pipeline
 
-#### `GoogleScript_DraftCreator.js`
-* This script reads the Google Sheet (company, contact, email).
-* It fetches attachments (like CVs and Cover Letters) from Google Drive.
-* It creates **personalized drafts** in Gmail. It checks if a `contactName` exists and writes a professional greeting (`Sehr geehrte [Name]...` or `Sehr geehrte Damen und Herren...`).
+I engineered a two-stage system: a **Chrome Extension** for data harvesting and a **Google Apps Script** engine for personalized, anti-spam email dispatch.
 
-#### `GoogleScript_AntiSpamSender.js`
-* To avoid being flagged as spam, this script runs on a time-based trigger.
-* It sends **one email per minute** from the draft queue.
-* This simulates human behavior and ensures high deliverability.
+### 🔄 System Architecture
 
-This project demonstrates my ability to analyze a real-world problem and build a full-stack, creative, and *smooth*  solution from front-to-back.
+```mermaid
+graph LR
+    subgraph Data Acquisition
+        A[Job Board URL] -->|Chrome Extension| B(DOM Scraper)
+        B -->|Extract Contacts| C[Clean CSV Export]
+    end
+    
+    subgraph Execution Engine
+        C -->|Import| D{Google Sheet}
+        E[Google Drive] -->|Fetch CV/Docs| F(Draft Creator Script)
+        D --> F
+        F -->|Generate| G[Gmail Drafts Queue]
+        G -->|Throttle 1/min| H[Anti-Spam Sender]
+    end

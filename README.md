@@ -46,3 +46,71 @@ graph LR
         F -->|Generate| G[Gmail Drafts Queue]
         G -->|Throttle 1/min| H[Anti-Spam Sender]
     end
+```
+
+⚙️ Core Components
+1. The Harvester (Chrome Extension)
+Built on Manifest V3, this extension automates the data collection layer.
+
+Headless Navigation: Iterates through pagination and opens job details in background tabs.
+
+Smart Extraction: Uses heuristic DOM selectors to identify Contact Person, Email, and Company Name even on inconsistent layouts.
+
+Target Sites: Optimized for gastrojobs.de, aubi-plus, and ausbildungsheld.
+
+2. The Mailer (Google Apps Script)
+A server-side engine running on Google Cloud to handle the "Human Touch".
+
+Dynamic Personalization: Detects the contact's name to generate specific salutations:
+
+"Sehr geehrte Frau Müller..." (if female name detected)
+
+"Sehr geehrter Herr Schmidt..." (if male name detected)
+
+"Sehr geehrte Damen und Herren..." (fallback)
+
+Context Awareness: Automatically attaches the correct PDF documents (CV, Cover Letter) from Google Drive.
+
+3. The Anti-Spam Protocol
+To ensure high deliverability and avoid Gmail's spam filters:
+
+Time-Based Trigger: The AntiSpamSender.js script runs on a 1-minute cron job.
+
+Throttling: Dispatches exactly one email per minute. This mimics human behavior, ensuring the account remains in good standing.
+
+📂 Project Structure
+Bash
+
+Job-Application-Automator/
+├── extension/                  # Chrome Extension Source
+│   ├── manifest.json           # Manifest V3 Config
+│   ├── background.js           # Tab & State Management
+│   ├── content.js              # DOM Scraping Logic
+│   └── popup.html              # UI Control
+├── google_scripts/             # Cloud Automation
+│   ├── DraftCreator.js         # Template Engine
+│   └── AntiSpamSender.js       # Throttling Logic
+└── README.md
+🚀 Results
+Throughput: Capable of processing 500+ applications in a single run.
+
+Success Rate: Helped 3 candidates secure contracts within 2 weeks of deployment.
+
+Efficiency: Reduced daily workload from 4 hours to ~15 minutes (monitoring).
+
+⚠️ Disclaimer
+<div align="center">
+
+Educational Purpose Only
+
+</div>
+
+This software was developed to demonstrate browser automation and API integration capabilities.
+
+The author (Redouane Boundra) is NOT responsible for any misuse of this tool, including but not limited to spamming, violation of platform Terms of Service, or data privacy breaches.
+
+Users are responsible for ensuring their usage complies with GDPR and local anti-spam laws (e.g., UWG in Germany).
+
+Use responsibly and ethically.
+
+Engineered by Redouane Boundra.

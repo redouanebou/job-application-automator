@@ -1,79 +1,212 @@
-function createRedouaneAusbildungDrafts() {
-  const anshreibenFileName = "Anschreiben_Redouane.pdf";
-  const lebenslaufFileName = "Lebenslauf_Redouane.pdf";
-  const zeugnisseFileName = "Zeugnisse_Redouane.pdf"; 
-  const sheetFileName = "scraped_data";
+/**
+ * Professional Email Draft Generator for Job Applications
+ * Generates personalized Gmail drafts with attachments from Google Drive data
+ * @redouane.boudra Advanced Implementation
+ * @version 2.0
+ */
 
-  const anshreibenFiles = DriveApp.getFilesByName(anshreibenFileName);
-  const lebenslaufFiles = DriveApp.getFilesByName(lebenslaufFileName);
-  const zeugnisseFiles = DriveApp.getFilesByName(zeugnisseFileName);
-  const sheetFiles = DriveApp.getFilesByName(sheetFileName);
-
-  if (!anshreibenFiles.hasNext() || !lebenslaufFiles.hasNext() || !zeugnisseFiles.hasNext()) {
-    Logger.log("A pdf of Redouane is wrong! please check the names again: Anschreiben_Redouane.pdf, Lebenslauf_Redouane.pdf, Zeugnisse_Redouane.pdf");
-    return;
+class EmailDraftGenerator {
+  constructor() {
+    this.config = {
+      files: {
+        cv: "Lebenslauf_redouane.pdf",
+        letter: "Anschreiben_redouane.pdf",
+        sheet: "info1"
+      },
+      subject: "Bewerbung als Pflegehelferin (Quereinstieg) - Redouane Boundra",
+      senderName: "Redouane Boundra",
+      emailRegex: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+    };
+    
+    this.contactInfo = {
+      name: "Redouane Boundra",
+      address: "Hilde-Coppi-Straße x",
+      city: "07552 xxxx",
+      phone: "+xx xxx xxxx xxxx"
+    };
   }
-  if (!sheetFiles.hasNext()) {
-    Logger.log("Google Sheet '" + sheetFileName + "' isn't there!");
-    return;
+
+
+  execute() {
+    try {
+      const attachments = this.loadAttachments();
+      const recipients = this.loadRecipients();
+      
+      this.generateDrafts(recipients, attachments);
+      
+      Logger.log(`✅ Successfully generated ${recipients.length} draft(s)`);
+    } catch (error) {
+      Logger.log(`❌ Fatal error: ${error.message}`);
+      throw error;
+    }
   }
 
-  const anshreibenBlob = anshreibenFiles.next().getBlob();
-  const lebenslaufBlob = lebenslaufFiles.next().getBlob();
-  const zeugnisseBlob = zeugnisseFiles.next().getBlob();
-  const attachments = [anshreibenBlob, lebenslaufBlob, zeugnisseBlob];
 
-  const sheetFile = sheetFiles.next();
-  const sheet = SpreadsheetApp.open(sheetFile).getSheets()[0];
-  const data = sheet.getDataRange().getValues();
+  loadAttachments() {
+    const cvBlob = this.getFileBlob(this.config.files.cv, "CV");
+    const letterBlob = this.getFileBlob(this.config.files.letter, "Cover Letter");
+    
+    return [letterBlob, cvBlob];
+  }
 
-  for (let i = 1; i < data.length; i++) {
-    const companyName = data[i][0]; 
-    const contactName = data[i][1]; 
-    let email = data[i][2];         
 
-    if (!email) {
-      Logger.log(`Email is missing in the line ${i + 1}`);
-      continue;
+  getFileBlob(fileName, fileType) {
+    const files = DriveApp.getFilesByName(fileName);
+    
+    if (!files.hasNext()) {
+      throw new Error(`${fileType} file '${fileName}' not found in Drive`);
     }
     
-    email = email.trim();
-    if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
-        Logger.log(`Email in the line ${i + 1} is wrong: ${email}`);
+    return files.next().getBlob();
+  }
+
+
+  loadRecipients() {
+    const sheetFiles = DriveApp.getFilesByName(this.config.files.sheet);
+    
+    if (!sheetFiles.hasNext()) {
+      throw new Error(`Spreadsheet '${this.config.files.sheet}' not found in Drive`);
+    }
+    
+    const sheet = SpreadsheetApp.open(sheetFiles.next()).getSheets()[0];
+    const data = sheet.getDataRange().getValues();
+    
+    return this.parseRecipientData(data);
+  }
+
+
+  parseRecipientData(data) {
+    const recipients = [];
+    
+    for (let i = 1; i < data.length; i++) {
+      const [companyName, contactName, rawEmail] = data[i];
+      
+      if (!rawEmail) {
+        Logger.log(`⚠️ Row ${i + 1}: Missing email address, skipping`);
         continue;
-    }
-
-    Logger.log(`work on the  ${i + 1} line: ${companyName}`);
-
-    let salutation;
-    if (contactName && contactName.trim() !== "" && contactName.trim().toLowerCase() !== "n/a") {
-      if (contactName.toLowerCase().includes("frau")) {
-        salutation = `Sehr geehrte ${contactName}`;
-      } else if (contactName.toLowerCase().includes("herr")) {
-        salutation = `Sehr geehrter ${contactName}`;
-      } else {
-        salutation = `Guten Tag ${contactName}`;
       }
-    } else if (companyName && companyName.trim() !== "" && companyName.trim().toLowerCase() !== "n/a") {
-      salutation = `Sehr geehrte Damen und Herren im ${companyName}-Team`;
-    } else {
-      salutation = `Sehr geehrte Damen und Herren`;
+      
+      const email = this.normalizeEmail(rawEmail);
+      
+      if (!this.isValidEmail(email)) {
+        Logger.log(`❌ Row ${i + 1}: Invalid email format: ${email}`);
+        continue;
+      }
+      
+      recipients.push({
+        email,
+        companyName: companyName || null,
+        contactName: contactName || null,
+        rowNumber: i + 1
+      });
     }
-
-    const subject = `Bewerbung Ausbildung Gastronomie | Motivierter Kandidat mit Praxiserfahrung & Flexibilität`;
     
-    const body = `${salutation},\n\n` +
-      `mein Name ist Redouane Boundra und ich bringe genau die richtige Mischung aus Theorie und Praxis für Ihr Team mit.\n\n` +
-      `Während andere Bewerber entweder nur praktische Erfahrung oder nur ein Studium vorweisen, biete ich Ihnen beides: Ein abgeschlossenes Wirtschaftsstudium, das mir ein tiefes Verständnis für betriebliche Abläufe gibt, kombiniert mit direkter Praxiserfahrung aus der Gastronomie, wo ich meine Leidenschaft für exzellenten Service entdeckt habe. Ich verstehe nicht nur, wie man einen Gast glücklich macht, sondern auch, wie das Geschäft dahinter funktioniert.\n\n` +
-      `Ich bin hochmotiviert, spreche Deutsch auf B1-Niveau und stehe bereit, nach Vertragsunterzeichnung umgehend den Visumsprozess einzuleiten. Hinsichtlich des Starttermins bin ich sehr flexibel und offen für einen Ausbildungsbeginn zu einem für Sie passenden Zeitpunkt im Jahr 2026. Meine vollständigen Unterlagen finden Sie im Anhang.\n\n` +
-      `Ich freue mich darauf, Sie in einem Gespräch persönlich zu überzeugen.\n\n` +
-      `Mit freundlichen Grüßen\nRedouane Boundra`;
+    return recipients;
+  }
 
-    GmailApp.createDraft(email, subject, body, {
-      attachments: attachments,
-      name: "Redouane Boundra"
+
+  normalizeEmail(email) {
+    return email.toString().trim().replace(/\s/g, '');
+  }
+
+
+  isValidEmail(email) {
+    return this.config.emailRegex.test(email);
+  }
+
+
+  generateDrafts(recipients, attachments) {
+    recipients.forEach(recipient => {
+      try {
+        const salutation = this.generateSalutation(recipient);
+        const body = this.generateEmailBody(salutation);
+        
+        GmailApp.createDraft(
+          recipient.email,
+          this.config.subject,
+          body,
+          {
+            attachments: attachments,
+            name: this.config.senderName
+          }
+        );
+        
+        Logger.log(`✅ Draft created for: ${recipient.email}`);
+      } catch (error) {
+        Logger.log(`❌ Failed to create draft for ${recipient.email}: ${error.message}`);
+      }
     });
   }
 
-  Logger.log("The end of the work (or Google stopped it).");
+  
+  generateSalutation(recipient) {
+    const { contactName, companyName } = recipient;
+    
+    if (this.isValidContactName(contactName)) {
+      return this.getSalutationByGender(contactName);
+    }
+    
+    if (this.isValidCompanyName(companyName)) {
+      return `Sehr geehrte Damen und Herren des ${companyName}-Teams`;
+    }
+    
+    return "Sehr geehrte Damen und Herren";
+  }
+
+
+  isValidContactName(contactName) {
+    return contactName && 
+           contactName !== "N/A" && 
+           contactName.trim() !== "";
+  }
+
+
+  isValidCompanyName(companyName) {
+    return companyName && 
+           companyName !== "N/A" && 
+           companyName.trim() !== "";
+  }
+
+
+  getSalutationByGender(contactName) {
+    const lowerName = contactName.toLowerCase();
+    
+    if (lowerName.includes("frau")) {
+      return `Sehr geehrte ${contactName}`;
+    }
+    
+    if (lowerName.includes("herr")) {
+      return `Sehr geehrter ${contactName}`;
+    }
+    
+    return `Guten Tag ${contactName}`;
+  }
+
+
+  generateEmailBody(salutation) {
+    return `${salutation},
+
+mit diesem Schreiben bewerbe ich mich bei Ihnen als Pflegehelferin. Als zuverlässige und engagierte EU-Bürgerin (Italien) mit Wohnsitz in Gera möchte ich meinen beruflichen Weg nun in der Pflege fortsetzen.
+
+Warum ich? In meiner bisherigen Arbeit als Servicekraft habe ich gelernt, auch in stressigen Momenten ruhig zu bleiben, Verantwortung zu übernehmen und stets freundlich auf Menschen zuzugehen. Diese "Service-Mentalität" – gepaart mit meiner körperlichen Belastbarkeit und Empathie – bringe ich nun in die Betreuung Ihrer Bewohner ein.
+
+Ich verfüge über Deutschkenntnisse auf B1-Niveau und spreche zudem fließend Italienisch, Arabisch und Französisch, was in einem multikulturellen Team von großem Vorteil ist. Da ich bereits in Deutschland lebe, bin ich flexibel und kurzfristig einsatzbereit.
+
+Meine vollständigen Bewerbungsunterlagen (Lebenslauf & Zeugnisse) finden Sie im Anhang. Gerne überzeuge ich Sie bei einem Probearbeitstag von meiner Motivation.
+
+Ich freue mich auf Ihre Rückmeldung.
+
+Mit freundlichen Grüßen,
+
+${this.contactInfo.name}
+${this.contactInfo.address}
+${this.contactInfo.city}
+Tel.: ${this.contactInfo.phone}`;
+  }
+}
+
+
+function createRedouanePflegeDrafts() {
+  const generator = new EmailDraftGenerator();
+  generator.execute();
 }

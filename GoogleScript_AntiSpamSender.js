@@ -1,6 +1,6 @@
 function initEmailSender() {
   const PROP = PropertiesService.getScriptProperties();
-  const drafts = GmailApp.getDrafts().slice(0, 500);
+  const drafts = GmailApp.getDrafts().slice(0, 500);  //500 or your email limit
   if (drafts.length === 0) {
     Logger.log('❌ No drafts.'); 
     return;

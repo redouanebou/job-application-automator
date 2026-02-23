@@ -9,7 +9,7 @@ function initEmailSender() {
   PROP.setProperty('draftQueue', JSON.stringify(queue));
   
   let now = new Date(),
-      start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 7, 0, 0);  //make sure to adjuste the time zone at settings of your project , like setting gmt+1 berlin centre or something like that to achieve good results using theyr working business hour 
+      start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 8, 0, 0);  //make sure to adjuste the time zone at settings of your project , like setting gmt+1 berlin centre or something like that to achieve good results using theyr working business hour 
   if (start <= now) start.setDate(start.getDate() + 1);
   
   ScriptApp.newTrigger('startMinuteLoop')
